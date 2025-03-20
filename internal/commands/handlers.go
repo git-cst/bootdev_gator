@@ -77,3 +77,38 @@ func setConfigUser(s *config.State, u string) error {
 
 	return nil
 }
+
+func HandlerReset(s *config.State, cmd Command) error {
+	err := s.Db.ResetUsers(context.Background())
+	if err != nil {
+		fmt.Printf("Error resetting user table: %v", err)
+		os.Exit(1)
+	}
+
+	fmt.Println("Successfully reset user table")
+
+	return nil
+}
+
+func HandlerUsers(s *config.State, cmd Command) error {
+	users, err := s.Db.GetUsers(context.Background())
+	if err != nil {
+		// Check if this is a no data found error
+		if err == sql.ErrNoRows {
+			fmt.Println("User does not exist")
+			os.Exit(1)
+		}
+		// Handle other errors
+		fmt.Printf("Error retrieving users\nError was: %v", err)
+	}
+
+	for _, user := range users {
+		message := fmt.Sprintf("* %s", user.Name)
+		if user.Name == s.Config.User {
+			message += " (current)"
+		}
+		fmt.Printf("%s\n", message)
+	}
+
+	return nil
+}
