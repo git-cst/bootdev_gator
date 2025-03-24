@@ -16,4 +16,4 @@ LIMIT 1;
 SELECT * FROM users;
 
 -- name: ResetUsers :exec
-TRUNCATE TABLE users;
+TRUNCATE TABLE users CASCADE;

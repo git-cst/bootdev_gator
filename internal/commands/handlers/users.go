@@ -1,4 +1,4 @@
-package commands
+package handlers
 
 import (
 	"context"
@@ -7,12 +7,13 @@ import (
 	"os"
 	"time"
 
+	"github.com/git-cst/bootdev_gator/internal/commands"
 	"github.com/git-cst/bootdev_gator/internal/config"
 	"github.com/git-cst/bootdev_gator/internal/database"
 	"github.com/lib/pq"
 )
 
-func HandlerLogin(s *config.State, cmd Command) error {
+func HandlerLogin(s *config.State, cmd commands.Command) error {
 	if len(cmd.Args) < 1 {
 		return fmt.Errorf("no user passed to the login handler: %v", cmd.Args)
 	}
@@ -26,7 +27,7 @@ func HandlerLogin(s *config.State, cmd Command) error {
 			os.Exit(1)
 		}
 		// Handle other errors
-		fmt.Printf("Error retrieving user: %s\nError was: %v", loginUserRequest, err)
+		fmt.Printf("Error retrieving user: %s\nError was: %v\n", loginUserRequest, err)
 	}
 
 	setConfigUser(s, databaseUser.Name)
@@ -34,7 +35,7 @@ func HandlerLogin(s *config.State, cmd Command) error {
 	return nil
 }
 
-func HandlerRegister(s *config.State, cmd Command) error {
+func HandlerRegister(s *config.State, cmd commands.Command) error {
 	if len(cmd.Args) < 1 {
 		return fmt.Errorf("no user passed to the register handler: %v", cmd.Args)
 	}
@@ -61,36 +62,12 @@ func HandlerRegister(s *config.State, cmd Command) error {
 	}
 
 	setConfigUser(s, createdUser.Name)
-	fmt.Printf("Created user: %v", createdUser)
+	fmt.Printf("Created user: %v\n", createdUser)
 
 	return nil
 }
 
-func setConfigUser(s *config.State, u string) error {
-	s.Config.User = u
-	err := config.WriteConfig(s.Config)
-	if err != nil {
-		return fmt.Errorf("error while setting user: %s", u)
-	}
-
-	fmt.Printf("Successfully set user %s\n", u)
-
-	return nil
-}
-
-func HandlerReset(s *config.State, cmd Command) error {
-	err := s.Db.ResetUsers(context.Background())
-	if err != nil {
-		fmt.Printf("Error resetting user table: %v", err)
-		os.Exit(1)
-	}
-
-	fmt.Println("Successfully reset user table")
-
-	return nil
-}
-
-func HandlerUsers(s *config.State, cmd Command) error {
+func HandlerUsers(s *config.State, cmd commands.Command) error {
 	users, err := s.Db.GetUsers(context.Background())
 	if err != nil {
 		// Check if this is a no data found error
@@ -99,7 +76,7 @@ func HandlerUsers(s *config.State, cmd Command) error {
 			os.Exit(1)
 		}
 		// Handle other errors
-		fmt.Printf("Error retrieving users\nError was: %v", err)
+		fmt.Printf("Error retrieving users\nError was: %v\n", err)
 	}
 
 	for _, user := range users {
@@ -109,6 +86,18 @@ func HandlerUsers(s *config.State, cmd Command) error {
 		}
 		fmt.Printf("%s\n", message)
 	}
+
+	return nil
+}
+
+func HandlerReset(s *config.State, cmd commands.Command) error {
+	err := s.Db.ResetUsers(context.Background())
+	if err != nil {
+		fmt.Printf("Error resetting user table: %v\n", err)
+		os.Exit(1)
+	}
+
+	fmt.Println("Successfully reset user table")
 
 	return nil
 }
