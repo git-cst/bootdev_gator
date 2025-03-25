@@ -18,7 +18,7 @@ SELECT
     f.updated_at as updated_at
 FROM feed as f
 INNER JOIN users as u
-ON u.id = f.user_id; 
+ON u.id = f.user_id;
 
 -- name: GetFeedByUrl :one
 SELECT 
@@ -70,3 +70,18 @@ feed_follows
 WHERE 
 feed_follows.user_id = $1 AND
 feed_follows.feed_id = $2;
+
+-- name: MarkFeedFetched :one
+UPDATE feed
+SET 
+    updated_at = $1,
+    last_fetched_at = $2
+WHERE id = $3
+RETURNING *;
+
+-- name: GetNextFeedToFetch :one
+SELECT
+    *
+FROM feed
+ORDER BY last_fetched_at ASC NULLS FIRST
+LIMIT 1;
