@@ -55,3 +55,7 @@ func followFeed(ctx context.Context, s *config.State, feedId uuid.UUID, user dat
 	fmt.Printf("Feed: %s has been followed by user: %s\n", follow.FeedName, follow.Username)
 	return nil
 }
+
+func parseTimeString(timeString string) time.Time {
+	return time.Time{}
+}

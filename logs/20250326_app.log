@@ -1,0 +1,24 @@
+INFO: 2025/03/26 22:11:26 logger.go:34: [INFO] Retrieving users
+INFO: 2025/03/26 22:11:26 logger.go:34: [INFO] Successfully retrieved users from database
+INFO: 2025/03/26 22:19:21 logger.go:34: [INFO] Fetching feeds from Hacker News RSS
+INFO: 2025/03/26 22:19:21 logger.go:34: [INFO] Created post for fetched feed 0a84e6fb-aa3d-454d-89d5-8a85e30144ce. Post title: Bubble Paper Airplane
+INFO: 2025/03/26 22:19:21 logger.go:34: [INFO] Created post for fetched feed 0a84e6fb-aa3d-454d-89d5-8a85e30144ce. Post title: Airbus announces missile-slinging drone for air defense
+INFO: 2025/03/26 22:19:21 logger.go:34: [INFO] Created post for fetched feed 0a84e6fb-aa3d-454d-89d5-8a85e30144ce. Post title: Writing a Linux Debugger
+INFO: 2025/03/26 22:19:21 logger.go:34: [INFO] Created post for fetched feed 0a84e6fb-aa3d-454d-89d5-8a85e30144ce. Post title: No Man's Sky's newest update adds bones and fossils beneath the Earth
+INFO: 2025/03/26 22:19:21 logger.go:34: [INFO] Created post for fetched feed 0a84e6fb-aa3d-454d-89d5-8a85e30144ce. Post title: Humans in Africa's wet tropical forests 150 thousand years ago
+INFO: 2025/03/26 22:19:21 logger.go:34: [INFO] Created post for fetched feed 0a84e6fb-aa3d-454d-89d5-8a85e30144ce. Post title: AI Data Poisoning
+INFO: 2025/03/26 22:19:21 logger.go:34: [INFO] Created post for fetched feed 0a84e6fb-aa3d-454d-89d5-8a85e30144ce. Post title: CoreWeave triggered defaults after breaching terms on Blackstone loan
+INFO: 2025/03/26 22:19:21 logger.go:34: [INFO] Created post for fetched feed 0a84e6fb-aa3d-454d-89d5-8a85e30144ce. Post title: Tax/legal checklist for a subscription and revenue sharing model?
+INFO: 2025/03/26 22:19:21 logger.go:34: [INFO] Created post for fetched feed 0a84e6fb-aa3d-454d-89d5-8a85e30144ce. Post title: Why following fixations makes our creative work better
+INFO: 2025/03/26 22:19:21 logger.go:34: [INFO] Created post for fetched feed 0a84e6fb-aa3d-454d-89d5-8a85e30144ce. Post title: Private equity firms consolidating homes for disabled
+INFO: 2025/03/26 22:19:21 logger.go:34: [INFO] Created post for fetched feed 0a84e6fb-aa3d-454d-89d5-8a85e30144ce. Post title: Admin to impose reciprocal tariffs on major trading partners April 2
+INFO: 2025/03/26 22:19:21 logger.go:34: [INFO] Created post for fetched feed 0a84e6fb-aa3d-454d-89d5-8a85e30144ce. Post title: After 50 million miles, Waymos crash a lot less than human drivers
+INFO: 2025/03/26 22:19:21 logger.go:34: [INFO] Created post for fetched feed 0a84e6fb-aa3d-454d-89d5-8a85e30144ce. Post title: Using Computer Fans for Home Air Movement
+INFO: 2025/03/26 22:19:21 logger.go:34: [INFO] Created post for fetched feed 0a84e6fb-aa3d-454d-89d5-8a85e30144ce. Post title: The average Wall Street bonus is now 4 times a worker's salary
+INFO: 2025/03/26 22:19:21 logger.go:34: [INFO] Created post for fetched feed 0a84e6fb-aa3d-454d-89d5-8a85e30144ce. Post title: Postel's Law and the Three Ring Circus
+INFO: 2025/03/26 22:19:21 logger.go:34: [INFO] Created post for fetched feed 0a84e6fb-aa3d-454d-89d5-8a85e30144ce. Post title: Rivian spins out a new micromobility startup called Also with $105M from Eclipse
+INFO: 2025/03/26 22:19:21 logger.go:34: [INFO] Created post for fetched feed 0a84e6fb-aa3d-454d-89d5-8a85e30144ce. Post title: Secure Attention Key
+INFO: 2025/03/26 22:19:21 logger.go:34: [INFO] Created post for fetched feed 0a84e6fb-aa3d-454d-89d5-8a85e30144ce. Post title: Three Things Never to Fade
+INFO: 2025/03/26 22:19:21 logger.go:34: [INFO] Created post for fetched feed 0a84e6fb-aa3d-454d-89d5-8a85e30144ce. Post title: Towards a Recommendation on Open Cultural Heritage (Taroch)
+INFO: 2025/03/26 22:19:21 logger.go:34: [INFO] Created post for fetched feed 0a84e6fb-aa3d-454d-89d5-8a85e30144ce. Post title: MCP Server for LLDB
+INFO: 2025/03/26 22:19:21 logger.go:34: [INFO] Feed scraping completed successfully

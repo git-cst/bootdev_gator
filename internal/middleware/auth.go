@@ -12,6 +12,7 @@ func MiddlewareLoggedIn(handler func(s *config.State, cmd commands.Command, user
 	return func(s *config.State, cmd commands.Command) error {
 		user, err := s.Db.GetUser(context.Background(), s.Config.User)
 		if err != nil {
+			s.LogError("Tried to retrieve user %s from database, failed while doing so err: %v", s.Config.User, err)
 			return err
 		}
 

@@ -14,9 +14,11 @@ import (
 	"github.com/git-cst/bootdev_gator/internal/commands"
 	"github.com/git-cst/bootdev_gator/internal/config"
 	"github.com/git-cst/bootdev_gator/internal/database"
+	"github.com/lib/pq"
 )
 
 func HandlerAgg(s *config.State, cmd commands.Command) error {
+	s.LogInfo("Start aggregator service")
 	if len(cmd.Args) < 1 {
 		return fmt.Errorf("expected to receive time duration string as command: %s", cmd.Args)
 	}
@@ -24,13 +26,13 @@ func HandlerAgg(s *config.State, cmd commands.Command) error {
 
 	timeBetweenReqs, err := time.ParseDuration(durationString)
 	if err != nil {
+		s.LogError("Error parsing %s to time.Duration. Error was %v", timeBetweenReqs, err)
 		return fmt.Errorf("error parsing %s\nerror was %v", timeBetweenReqs, err)
 	}
 
-	fmt.Println("==================================================")
 	ticker := time.NewTicker(timeBetweenReqs)
 	for ; ; <-ticker.C {
-		fmt.Printf("Collecting feeds every %v\n", timeBetweenReqs)
+		s.LogInfo("Collecting feeds every %v", timeBetweenReqs)
 		scrapeFeeds(s)
 	}
 }
@@ -40,7 +42,7 @@ type RSSFeed struct {
 		Title       string    `xml:"title"`
 		Link        string    `xml:"link"`
 		Description string    `xml:"description"`
-		Item        []RSSItem `xml:"item"`
+		Items       []RSSItem `xml:"item"`
 	} `xml:"channel"`
 }
 
@@ -73,9 +75,9 @@ func fetchFeed(c *config.Config, ctx context.Context, feedUrl string) (*RSSFeed,
 	feed.Channel.Title = html.UnescapeString(feed.Channel.Title)
 	feed.Channel.Description = html.UnescapeString(feed.Channel.Description)
 
-	for i := range feed.Channel.Item {
-		feed.Channel.Item[i].Title = html.UnescapeString(feed.Channel.Item[i].Title)
-		feed.Channel.Item[i].Description = html.UnescapeString(feed.Channel.Item[i].Description)
+	for i := range feed.Channel.Items {
+		feed.Channel.Items[i].Title = html.UnescapeString(feed.Channel.Items[i].Title)
+		feed.Channel.Items[i].Description = html.UnescapeString(feed.Channel.Items[i].Description)
 	}
 
 	return &feed, nil
@@ -87,13 +89,15 @@ func scrapeFeeds(s *config.State) error {
 	if err != nil {
 		// Handle no rows error
 		if errors.Is(err, sql.ErrNoRows) {
+			s.LogInfo("No feeds registered in database")
 			return fmt.Errorf("no feeds registered in database")
 		}
 		// Handle other errors
+		s.LogError("Failed to get next feed: %v", err)
 		return err
 	}
 
-	params := database.MarkFeedFetchedParams{
+	markFetchedParams := database.MarkFeedFetchedParams{
 		UpdatedAt: time.Now(),
 		LastFetchedAt: sql.NullTime{
 			Time:  time.Now(),
@@ -101,10 +105,11 @@ func scrapeFeeds(s *config.State) error {
 		},
 		ID: feed.ID,
 	}
-	fetchedFeed, err := s.Db.MarkFeedFetched(ctx, params)
+	fetchedFeed, err := s.Db.MarkFeedFetched(ctx, markFetchedParams)
 	if err != nil {
 		// Handle no rows error
 		if errors.Is(err, sql.ErrNoRows) {
+			s.LogError("No feed returned by mark feed fetched.")
 			return fmt.Errorf("no feed returned by mark feed fetched")
 		}
 		// Handle other errors
@@ -116,11 +121,44 @@ func scrapeFeeds(s *config.State) error {
 		return err
 	}
 
-	fmt.Printf("Fetched the following items from rssfeed %v:\n\n", fetchedFeed.Name)
-	for _, item := range rssFeed.Channel.Item {
-		fmt.Println(item.Title)
-	}
-	fmt.Println("==================================================")
+	s.LogInfo("Fetching feeds from %v", fetchedFeed.Name)
+	for _, item := range rssFeed.Channel.Items {
+		var descriptionNull sql.NullString
+		if item.Description != "" {
+			descriptionNull = sql.NullString{
+				String: item.Description,
+				Valid:  true,
+			}
+		} else {
+			descriptionNull = sql.NullString{
+				Valid: false,
+			}
+		}
 
+		createPostParams := database.CreatePostParams{
+			CreatedAt:   time.Now(),
+			UpdatedAt:   time.Now(),
+			Title:       item.Title,
+			Url:         item.Link,
+			Description: descriptionNull,
+			PublishedAt: parseTimeString(item.PubDate),
+			FeedID:      fetchedFeed.ID,
+		}
+
+		_, err := s.Db.CreatePost(ctx, createPostParams)
+		if err != nil {
+			if pqErr, ok := err.(*pq.Error); ok {
+				if pqErr.Code == "23505" { // PostgreSQL error code for unique violation
+					// OK expected behaviour
+					continue
+				}
+				// Log the error
+				s.LogError("Could not create the post for fetched feed %s (%v). Item failed was %s", fetchedFeed.Name, fetchedFeed.ID, item.Title)
+			}
+		}
+		s.LogInfo("Created post for fetched feed %v. Post title: %s", fetchedFeed.Name, item.Title)
+	}
+
+	s.LogInfo("Feed scraping completed successfully")
 	return nil
 }

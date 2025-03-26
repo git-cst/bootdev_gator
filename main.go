@@ -35,9 +35,12 @@ func main() {
 		Headers:     make(map[string]string),
 	}
 
+	logger := config.CreateLogger()
+
 	state := config.State{
 		Config: &configFile,
 		Db:     dbQueries,
+		Logger: logger,
 	}
 
 	state.Config.Client = config.NewClient(clientSetup)
