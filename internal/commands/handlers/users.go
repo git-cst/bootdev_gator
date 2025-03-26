@@ -93,7 +93,7 @@ func HandlerUsers(s *config.State, cmd commands.Command) error {
 			message += " (current)"
 		}
 
-		s.LogInfo("%s\n", message)
+		s.LogInfo(message)
 	}
 
 	s.LogInfo("Successfully retrieved users from database")
@@ -104,7 +104,7 @@ func HandlerReset(s *config.State, cmd commands.Command) error {
 	s.LogInfo("Starting reset users process")
 	err := s.Db.ResetUsers(context.Background())
 	if err != nil {
-		s.LogError("Error resetting user table: %v\n", err)
+		s.LogError("Error resetting user table: %v", err)
 		os.Exit(1)
 	}
 

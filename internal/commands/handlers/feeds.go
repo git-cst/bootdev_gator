@@ -135,14 +135,14 @@ func HandlerGetFeeds(s *config.State, cmd commands.Command) error {
 
 // middleware auth handles user
 func HandlerGetFollowing(s *config.State, cmd commands.Command, user database.User) error {
-	s.LogInfo("Getting feeds that %s (%v) user is following", user.Name, user.ID)
+	s.LogInfo("Getting feeds that %s (%v) is following", user.Name, user.ID)
 	ctx := context.Background()
 
 	feedFollows, err := s.Db.GetFeedFollowsForUser(ctx, user.ID)
 	if err != nil {
 		// Check if this is a no data found error
 		if errors.Is(err, sql.ErrNoRows) {
-			s.LogInfo("%s (%v) user is not following any feeds yet", user.Name, user.ID)
+			s.LogInfo("%s (%v) is not following any feeds yet", user.Name, user.ID)
 			fmt.Printf("User isn't following any feeds yet: %s\n", user.Name)
 			return nil
 		}
@@ -150,10 +150,8 @@ func HandlerGetFollowing(s *config.State, cmd commands.Command, user database.Us
 		return err
 	}
 
-	fmt.Printf("User %s is following:\n", user.Name)
 	for _, follow := range feedFollows {
-		s.LogInfo("%s (%v) user is following: %s", user.Name, user.ID, follow.FeedName)
-		fmt.Printf(" - %s", follow.FeedName)
+		s.LogInfo("%s (%v) is following: %s", user.Name, user.ID, follow.FeedName)
 	}
 
 	s.LogInfo("Successfully retrieved follows for %s (%v) user", user.Name, user.ID)

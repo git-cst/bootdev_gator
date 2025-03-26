@@ -19,7 +19,7 @@ func (c *Commands) Register(name string, f func(*config.State, Command) error) {
 	if c.HandlerFunctions == nil {
 		c.HandlerFunctions = make(map[string]func(*config.State, Command) error)
 	}
-	c.HandlerFunctions[name] = f // Assign the function parameter 'f', not 'function'
+	c.HandlerFunctions[name] = f
 }
 
 func (c *Commands) Run(s *config.State, cmd Command) error {

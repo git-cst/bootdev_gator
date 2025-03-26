@@ -156,7 +156,7 @@ func scrapeFeeds(s *config.State) error {
 				s.LogError("Could not create the post for fetched feed %s (%v). Item failed was %s", fetchedFeed.Name, fetchedFeed.ID, item.Title)
 			}
 		}
-		s.LogInfo("Created post for fetched feed %v. Post title: %s", fetchedFeed.Name, item.Title)
+		s.LogInfo("Created post for fetched feed %v. Post title: %s (Published: %s)", fetchedFeed.Name, item.Title, item.PubDate)
 	}
 
 	s.LogInfo("Feed scraping completed successfully")

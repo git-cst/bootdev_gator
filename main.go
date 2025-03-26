@@ -65,8 +65,10 @@ func main() {
 	// service related commands
 	cmds.Register("agg", handlers.HandlerAgg)
 
+	state.LogDebug("Starting RSS aggregator application")
+
 	if len(os.Args) < 2 {
-		fmt.Println("Usage: program_name command [args...]")
+		state.LogError("No command provided: Usage: program_name command [args...]")
 		os.Exit(1)
 	}
 
@@ -75,9 +77,17 @@ func main() {
 		Args: os.Args[2:],
 	}
 
+	if state.Config.User != "" {
+		state.LogDebug("User '%s' executing command: '%s' with args: %v", state.Config.User, cmd.Name, cmd.Args)
+	} else {
+		state.LogDebug("Unauthenticated user executing command: '%s' with args: %v", cmd.Name, cmd.Args)
+	}
+
 	err = cmds.Run(&state, cmd)
 	if err != nil {
-		fmt.Println("Error running command:", err)
+		state.LogError("Error executing command '%s': %v", cmd.Name, err)
 		os.Exit(1)
 	}
+
+	state.LogDebug("Command '%s' completed successfully", cmd.Name)
 }
