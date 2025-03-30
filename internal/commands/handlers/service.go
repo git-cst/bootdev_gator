@@ -20,7 +20,7 @@ import (
 func HandlerAgg(s *config.State, cmd commands.Command) error {
 	s.LogInfo("Start aggregator service")
 	if len(cmd.Args) < 1 {
-		return fmt.Errorf("expected to receive time duration string as command: %s", cmd.Args)
+		return fmt.Errorf("aggregator command expected to receive time duration string as command: %s", cmd.Args)
 	}
 	durationString := cmd.Args[0]
 
@@ -31,8 +31,8 @@ func HandlerAgg(s *config.State, cmd commands.Command) error {
 	}
 
 	ticker := time.NewTicker(timeBetweenReqs)
+	s.LogInfo("Collecting feeds every %v", timeBetweenReqs)
 	for ; ; <-ticker.C {
-		s.LogInfo("Collecting feeds every %v", timeBetweenReqs)
 		scrapeFeeds(s)
 	}
 }
@@ -84,6 +84,7 @@ func fetchFeed(c *config.Config, ctx context.Context, feedUrl string) (*RSSFeed,
 }
 
 func scrapeFeeds(s *config.State) error {
+	s.LogDebug("Start scraping process")
 	ctx := context.Background()
 	feed, err := s.Db.GetNextFeedToFetch(ctx)
 	if err != nil {
@@ -135,17 +136,22 @@ func scrapeFeeds(s *config.State) error {
 			}
 		}
 
+		publishedAt, err := parseTimeString(item.PubDate)
+		if err != nil {
+			s.LogError("Unknown time format %v, err: %v", item.PubDate, err)
+		}
+
 		createPostParams := database.CreatePostParams{
 			CreatedAt:   time.Now(),
 			UpdatedAt:   time.Now(),
 			Title:       item.Title,
 			Url:         item.Link,
 			Description: descriptionNull,
-			PublishedAt: parseTimeString(item.PubDate),
+			PublishedAt: publishedAt,
 			FeedID:      fetchedFeed.ID,
 		}
 
-		_, err := s.Db.CreatePost(ctx, createPostParams)
+		_, err = s.Db.CreatePost(ctx, createPostParams)
 		if err != nil {
 			if pqErr, ok := err.(*pq.Error); ok {
 				if pqErr.Code == "23505" { // PostgreSQL error code for unique violation
@@ -156,9 +162,9 @@ func scrapeFeeds(s *config.State) error {
 				s.LogError("Could not create the post for fetched feed %s (%v). Item failed was %s", fetchedFeed.Name, fetchedFeed.ID, item.Title)
 			}
 		}
-		s.LogInfo("Created post for fetched feed %v. Post title: %s (Published: %s)", fetchedFeed.Name, item.Title, item.PubDate)
+		s.LogInfo(" - Post title: %s (Published: %s)", item.Title, item.PubDate)
 	}
 
-	s.LogInfo("Feed scraping completed successfully")
+	s.LogDebug("Feed scraping completed successfully")
 	return nil
 }

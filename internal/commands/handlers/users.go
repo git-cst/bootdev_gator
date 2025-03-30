@@ -14,14 +14,14 @@ import (
 )
 
 func HandlerLogin(s *config.State, cmd commands.Command) error {
-	s.LogInfo("Starting login process")
+	s.LogDebug("Starting login process")
 	if len(cmd.Args) < 1 {
 		s.LogError("No user passed to the login handler: %v", cmd.Args)
-		return fmt.Errorf("no user passed to the login handler: %v", cmd.Args)
+		os.Exit(1)
 	}
 
 	loginUserRequest := cmd.Args[0]
-	s.LogInfo("User attempting login: %s", loginUserRequest)
+	s.LogDebug("User attempting login: %s", loginUserRequest)
 	databaseUser, err := s.Db.GetUser(context.Background(), loginUserRequest)
 	if err != nil {
 		// Check if this is a no data found error
@@ -34,13 +34,12 @@ func HandlerLogin(s *config.State, cmd commands.Command) error {
 	}
 
 	setConfigUser(s, databaseUser.Name)
-	s.LogInfo("User %s (%v) successfully logged in", databaseUser.Name, databaseUser.ID)
-
+	s.LogDebug("User %s (%v) successfully logged in", databaseUser.Name, databaseUser.ID)
 	return nil
 }
 
 func HandlerRegister(s *config.State, cmd commands.Command) error {
-	s.LogInfo("Starting user registration process")
+	s.LogDebug("Starting user registration process")
 	if len(cmd.Args) < 1 {
 		s.LogError("No user passed to the register handler: %v", cmd.Args)
 		return fmt.Errorf("no user passed to the register handler: %v", cmd.Args)
@@ -69,13 +68,12 @@ func HandlerRegister(s *config.State, cmd commands.Command) error {
 	}
 
 	setConfigUser(s, createdUser.Name)
-	s.LogInfo("Successfully registered user %s (%v)", createdUser.Name, createdUser.ID)
-
+	s.LogDebug("Successfully registered user %s (%v)", createdUser.Name, createdUser.ID)
 	return nil
 }
 
 func HandlerUsers(s *config.State, cmd commands.Command) error {
-	s.LogInfo("Retrieving users")
+	s.LogDebug("Retrieving users")
 	users, err := s.Db.GetUsers(context.Background())
 	if err != nil {
 		// Check if this is a no data found error
@@ -96,19 +94,18 @@ func HandlerUsers(s *config.State, cmd commands.Command) error {
 		s.LogInfo(message)
 	}
 
-	s.LogInfo("Successfully retrieved users from database")
+	s.LogDebug("Successfully retrieved users from database")
 	return nil
 }
 
 func HandlerReset(s *config.State, cmd commands.Command) error {
-	s.LogInfo("Starting reset users process")
+	s.LogDebug("Starting reset users process")
 	err := s.Db.ResetUsers(context.Background())
 	if err != nil {
 		s.LogError("Error resetting user table: %v", err)
 		os.Exit(1)
 	}
 
-	s.LogInfo("Successfully reset users table in database")
-
+	s.LogDebug("Successfully reset users table in database")
 	return nil
 }

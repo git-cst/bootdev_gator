@@ -28,14 +28,23 @@ func main() {
 	}
 	dbQueries := database.New(db)
 
+	// On Unix-like systems (Linux, macOS)
+	username := os.Getenv("USER")
+
+	// On Windows
+	if username == "" {
+		username = os.Getenv("USERNAME")
+	}
+
 	clientSetup := config.ClientOptions{
 		Timeout:     time.Duration(time.Second * 60),
-		UserAgent:   "gitcstGator",
+		UserAgent:   fmt.Sprintf("%s_gator", username),
 		ContentType: "application/rss+xml, application/atom+xml, application/xml, text/xml",
 		Headers:     make(map[string]string),
 	}
 
 	logger := config.CreateLogger()
+	defer logger.Close()
 
 	state := config.State{
 		Config: &configFile,
@@ -50,20 +59,24 @@ func main() {
 	}
 
 	// user related commands
-	cmds.Register("login", handlers.HandlerLogin)
-	cmds.Register("register", handlers.HandlerRegister)
-	cmds.Register("reset", handlers.HandlerReset)
-	cmds.Register("users", handlers.HandlerUsers)
+	cmds.Register("login", "Log the specified user in. 1st argument is the user.", handlers.HandlerLogin)
+	cmds.Register("register", "Register the user in the database.", handlers.HandlerRegister)
+	cmds.Register("reset", "Reset the users table.", handlers.HandlerReset)
+	cmds.Register("users", "Retrieve the available users in the database.", handlers.HandlerUsers)
 
 	// rss feed related commands
-	cmds.Register("feeds", handlers.HandlerGetFeeds)
-	cmds.Register("addfeed", middleware.MiddlewareLoggedIn(handlers.HandlerAddFeed))
-	cmds.Register("follow", middleware.MiddlewareLoggedIn(handlers.HandlerFollowFeed))
-	cmds.Register("following", middleware.MiddlewareLoggedIn(handlers.HandlerGetFollowing))
-	cmds.Register("unfollow", middleware.MiddlewareLoggedIn(handlers.HandlerUnfollow))
+	cmds.Register("feeds", "Retrieve the available feeds in the database.", handlers.HandlerGetFeeds)
+	cmds.Register("addfeed", "Add a new feed to be fetched.", middleware.MiddlewareLoggedIn(handlers.HandlerAddFeed))
+	cmds.Register("follow", "Follow a registered feed.", middleware.MiddlewareLoggedIn(handlers.HandlerFollowFeed))
+	cmds.Register("following", "Retrieve what another specified user is following.", middleware.MiddlewareLoggedIn(handlers.HandlerGetFollowing))
+	cmds.Register("unfollow", "Unfollow a feed.", middleware.MiddlewareLoggedIn(handlers.HandlerUnfollow))
 
 	// service related commands
-	cmds.Register("agg", handlers.HandlerAgg)
+	cmds.Register("agg", "Start the aggregator service.", handlers.HandlerAgg)
+	cmds.Register("browse", "Browse X feeds where X is the argument passed to the command.", middleware.MiddlewareLoggedIn(handlers.HandlerBrowse))
+
+	// application commands
+	cmds.Register("help", "Display the commands available to you.", cmds.ListCommands)
 
 	state.LogDebug("Starting RSS aggregator application")
 

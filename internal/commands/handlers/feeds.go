@@ -3,7 +3,6 @@ package handlers
 import (
 	"context"
 	"database/sql"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"time"
@@ -16,7 +15,7 @@ import (
 
 // middleware auth handles user
 func HandlerAddFeed(s *config.State, cmd commands.Command, user database.User) error {
-	s.LogInfo("User %s attempting to add feed: args=%v", user.Name, cmd.Args)
+	s.LogDebug("User %s attempting to add feed: args=%v", user.Name, cmd.Args)
 	if len(cmd.Args) < 2 {
 		errMsg := fmt.Sprintf("incorrect number of arguments passed, expected 2 (name of feed & url): %v", cmd.Args)
 		s.LogError("Failed to add feed: %s", errMsg)
@@ -69,16 +68,22 @@ func HandlerAddFeed(s *config.State, cmd commands.Command, user database.User) e
 		return err
 	}
 
-	s.LogInfo("User %s successfully added and followed feed: id=%s, name=%s", user.Name, feedId, feedName)
+	s.LogDebug("User %s successfully added and followed feed: id=%s, name=%s", user.Name, feedId, feedName)
 	return nil
 }
 
 // middleware auth handles user
 func HandlerFollowFeed(s *config.State, cmd commands.Command, user database.User) error {
-	s.LogInfo("User %s attempting to follow feed: args=%v", user.Name, cmd.Args)
+	s.LogDebug("User %s attempting to follow feed: args=%v", user.Name, cmd.Args)
 
 	if len(cmd.Args) < 1 {
 		s.LogError("no url passed to the follow feed handler: %v", cmd.Args)
+		fmt.Println("Available feeds are:")
+		err := HandlerGetFeeds(s, cmd)
+		if err != nil {
+			return fmt.Errorf("no url passed to the follow feed handler: %v", cmd.Args)
+		}
+
 		return fmt.Errorf("no url passed to the follow feed handler: %v", cmd.Args)
 	}
 
@@ -102,12 +107,12 @@ func HandlerFollowFeed(s *config.State, cmd commands.Command, user database.User
 		return err
 	}
 
-	s.LogInfo("User %s successfully followed feed: id=%s, name=%s", user.Name, feed.ID, feed.Name)
+	s.LogDebug("User %s successfully followed feed: id=%s, name=%s", user.Name, feed.ID, feed.Name)
 	return nil
 }
 
 func HandlerGetFeeds(s *config.State, cmd commands.Command) error {
-	s.LogInfo("Getting all feeds")
+	s.LogDebug("Getting all feeds")
 
 	ctx := context.Background()
 	feedData, err := s.Db.GetFeeds(ctx)
@@ -121,21 +126,22 @@ func HandlerGetFeeds(s *config.State, cmd commands.Command) error {
 		return err
 	}
 
-	jsonData, err := json.MarshalIndent(feedData, "", "	")
-	if err != nil {
-		s.LogError("Error marshaling feed data to JSON: %v", err)
-		return fmt.Errorf("error whilst prettifying feed query data: %v", err)
+	for _, feed := range feedData {
+		msg := fmt.Sprintf("%-20s %-35s %-15s %s",
+			feed.Name,
+			"("+feed.Url+")",
+			"last updated:",
+			feed.UpdatedAt.Format("Jan 02, 2006 at 15:04"))
+		s.LogInfo(msg)
 	}
 
-	s.LogInfo("Successfully retrieved %d feeds", len(feedData))
-	fmt.Println(string(jsonData))
-
+	s.LogDebug("Successfully retrieved %d feeds", len(feedData))
 	return nil
 }
 
 // middleware auth handles user
 func HandlerGetFollowing(s *config.State, cmd commands.Command, user database.User) error {
-	s.LogInfo("Getting feeds that %s (%v) is following", user.Name, user.ID)
+	s.LogDebug("Getting feeds that %s (%v) is following", user.Name, user.ID)
 	ctx := context.Background()
 
 	feedFollows, err := s.Db.GetFeedFollowsForUser(ctx, user.ID)
@@ -151,10 +157,10 @@ func HandlerGetFollowing(s *config.State, cmd commands.Command, user database.Us
 	}
 
 	for _, follow := range feedFollows {
-		s.LogInfo("%s (%v) is following: %s", user.Name, user.ID, follow.FeedName)
+		s.LogInfo("%s is following: %s", user.Name, follow.FeedName)
 	}
 
-	s.LogInfo("Successfully retrieved follows for %s (%v) user", user.Name, user.ID)
+	s.LogDebug("Successfully retrieved follows for %s (%v) user", user.Name, user.ID)
 	return nil
 }
 
@@ -162,10 +168,16 @@ func HandlerGetFollowing(s *config.State, cmd commands.Command, user database.Us
 func HandlerUnfollow(s *config.State, cmd commands.Command, user database.User) error {
 	if len(cmd.Args) < 1 {
 		s.LogError("no url passed to the unfollow feed handler: %v", cmd.Args)
+		fmt.Println("Available feeds are:")
+		err := HandlerGetFeeds(s, cmd)
+		if err != nil {
+			return fmt.Errorf("no url passed to the unfollow feed handler: %v", cmd.Args)
+		}
+
 		return fmt.Errorf("no url passed to command: %v", cmd.Args)
 	}
 
-	s.LogInfo("Unfollowing feed with url: %s", cmd.Args[0])
+	s.LogDebug("Unfollowing feed with url: %s", cmd.Args[0])
 	ctx := context.Background()
 	feedUrl := cmd.Args[0]
 	feed, err := s.Db.GetFeedByUrl(ctx, feedUrl)

@@ -79,6 +79,7 @@ FROM posts as p
 INNER JOIN feed_follows as ff
 ON ff.feed_id = p.feed_id
 WHERE ff.user_id = $1
+ORDER BY p.published_at DESC
 LIMIT $2
 `
 

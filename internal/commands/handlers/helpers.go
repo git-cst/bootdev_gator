@@ -56,6 +56,29 @@ func followFeed(ctx context.Context, s *config.State, feedId uuid.UUID, user dat
 	return nil
 }
 
-func parseTimeString(timeString string) time.Time {
-	return time.Time{}
+func parseTimeString(timeString string) (time.Time, error) {
+	// Try several common RSS date formats
+	formats := []string{
+		"Mon, 02 Jan 2006 15:04:05 -0700", // RFC1123 with timezone
+		"Mon, 02 Jan 2006 15:04:05 MST",   // RFC1123 with timezone abbreviation
+		"2006-01-02T15:04:05-07:00",       // ISO8601/RFC3339
+		"2006-01-02T15:04:05Z",            // ISO8601/RFC3339 UTC
+		"2006-01-02 15:04:05 -0700",       // Another common format
+		"02 Jan 2006 15:04:05 -0700",      // Another variation
+		// Add more formats as you encounter them
+	}
+
+	var firstErr error
+	for _, format := range formats {
+		publishedAt, err := time.Parse(format, timeString)
+		if err == nil {
+			return publishedAt, nil
+		}
+		if firstErr == nil {
+			firstErr = err
+		}
+	}
+
+	// If we got here, none of the formats worked
+	return time.Time{}, fmt.Errorf("could not parse time '%s': %v", timeString, firstErr)
 }
