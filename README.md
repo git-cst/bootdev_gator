@@ -149,67 +149,71 @@ gator/
    
    Verify the installation was a success using `sqlc version`.
   
-**4. Create the config file**
-    We're currently using a JSON file to handle the current user on the machine.  
-    This may be updated later to be handled differently.  
-      
-    Setup your file (named .gatorconfig.json) at your home directory.  
-    ```json
-    {
-      "db_url": "connection_string_goes_here",
-      "current_user_name": "username_goes_here"
-    }
-    ```
-    Replace the connection_string_goes_here with your connection string. See: (Goose migrations)[run-the-migrations].
-    The username replacement is handled by the application.
-    
-    Here's a bash script that creates and fills the file.
-    ```bash
-    cat > ~/gator_config.json << 'EOF'
-    {
-      "db_url": "connection_string_goes_here",
-      "current_user_name": "username_goes_here"
-    }
-    EOF
-    ```
+**3. Create the config file**
+
+We're currently using a JSON file to handle the current user on the machine.  
+This may be updated later to be handled differently.  
+  
+Setup your file (named .gatorconfig.json) at your home directory.  
+```json
+{
+  "db_url": "connection_string_goes_here",
+  "current_user_name": "username_goes_here"
+}
+```
+Replace the connection_string_goes_here with your connection string. See: [Goose migrations](#run-the-migrations).
+The username replacement is handled by the application.
+
+Here's a bash script that creates and fills the file.
+```bash
+cat > ~/gator_config.json << 'EOF'
+{
+  "db_url": "connection_string_goes_here",
+  "current_user_name": "username_goes_here"
+}
+EOF
+```
 
 **4. Create your database**
-    Start the database service:
-    ```
-    Mac: brew services start postgresql@15
-    Linux: sudo service postgresql start
-    ```
-      
-    Using either base psql or (PGAdmin)[https://www.pgadmin.org/] connect to the server.  
-    For psql:  
-    ```
-    Mac: psql postgres
-    Linux: sudo -u postgres psql
-    ```
-    Create the database  
-    ```
-    CREATE DATABASE gator;
-    ```
-    Set the user password (Linux only).
+
+Start the database service:
+```
+Mac: brew services start postgresql@15
+Linux: sudo service postgresql start
+```
+  
+Using either base psql or [PGAdmin](https://www.pgadmin.org/) connect to the server.  
+For psql:  
+```
+Mac: psql postgres
+Linux: sudo -u postgres psql
+```
+Create the database  
+```
+CREATE DATABASE gator;
+```
+Set the user password (Linux only).
   
 **5. Run the migrations**  
-    We need to run the migrations like so:  
-    ```
-    goose `connection string` up
-    ```
-      
-    Your connection string should be formatted like so:  
-    macOS (no password, your username): postgres://{user}:@localhost:5432/gator?sslmode=disable
-    Linux (password from (section 4)[#create-your-database], postgres user): postgres://{password}:postgres@localhost:5432/gator?sslmode=disable
-      
-    Run all 5 migrations.  
-    You should see a confirmation message be printed to your terminal for each migration.  
+
+We need to run the migrations like so:  
+```
+goose `connection string` up
+```
   
-6. Install the application
-    Go to your directory storing the go code and run:
-    ```
-    go install .
-    ```
+Your connection string should be formatted like so:  
+macOS (no password, your username): postgres://{user}:@localhost:5432/gator?sslmode=disable
+Linux (password from [section 4](#create-your-database), postgres user): postgres://{password}:postgres@localhost:5432/gator?sslmode=disable
+  
+Run all 5 migrations.  
+You should see a confirmation message be printed to your terminal for each migration.  
+  
+**6. Install the application**
+
+Go to your directory storing the go code and run:
+```
+go install .
+```
   
 ## Usage
 After installing there are a number of commands that can be used to interact with the application.  
