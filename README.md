@@ -202,8 +202,10 @@ goose `connection string` up
 ```
   
 Your connection string should be formatted like so:  
-macOS (no password, your username): postgres://{user}:@localhost:5432/gator?sslmode=disable
+```
+macOS (no password, your username): postgres://{user}:@localhost:5432/gator?sslmode=disable  
 Linux (password from [section 4](#create-your-database), postgres user): postgres://{password}:postgres@localhost:5432/gator?sslmode=disable
+```
   
 Run all 5 migrations.  
 You should see a confirmation message be printed to your terminal for each migration.  
