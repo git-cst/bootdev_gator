@@ -73,133 +73,143 @@ gator/
 ```
 
 ## Installation
-1. Clone the repository
+**1. Clone the repository**
    ```
    git clone <repository-url>
    cd gator
    ```
 
-2. Install required dependencies
-2.1. Golang
-If you don't already have golang installed here's the commands:  
-Mac  
-```
-brew install go
-```
-Linux  
-```
-sudo apt update
-sudo apt install golang
-```
-  
-Verify the installation was a success using `go version`
-2.2. Postgres
-Install the database:
-Mac
-```
-brew install postgresql@15
-```
-  
-Linux
-```
-sudo apt update
-sudo apt install postgresql postgresql-contrib
-```
-  
-After installing ensure you are on the right psql version (should be 15+):  
-```
-psql --version
-```
-  
-If you are installing on Linux ensure that you update the root password:
-```
-sudo passwd postgres
-```
-Enter a password, and be sure you won't forget it.
-  
-We also need a (Postgres driver)[https://github.com/lib/pq] to interact with the database.  
-```
-go get github.com/lib/pq
-```
-2.3. Goose
-We're using (Goose)[https://github.com/pressly/goose#install] to handle the database migrations in the Postgres database.
-Install method:
-```
-go install github.com/pressly/goose/v3/cmd/goose@latest
-```
-  
-Verify the installation was a success using `goose -version`.
-  
-2.4. SQLC  
-We're using (SQLC)[https://sqlc.dev/] to handle converting our SQL commands to type safe Go code.  
-Install method:  
-```
-go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
-```
-  
-Verify the installation was a success using `sqlc version`.
-  
-3. Create the config file
-We're currently using a JSON file to handle the current user on the machine.  
-This may be updated later to be handled differently.  
-  
-Setup your file (named .gatorconfig.json) at your home directory.  
-```json
-{
-  "db_url": "connection_string_goes_here",
-  "current_user_name": "username_goes_here"
-}
-```
-Replace the connection_string_goes_here with your connection string. See: (Goose migrations)[run-the-migrations].
-The username replacement is handled by the application.
+**2. Install required dependencies**
 
-Here's a bash script that creates and fills the file.
-```bash
-cat > ~/gator_config.json << 'EOF'
-{
-  "db_url": "connection_string_goes_here",
-  "current_user_name": "username_goes_here"
-}
-EOF
-```
+   **Golang**
+   
+   If you don't already have golang installed here's the commands:  
+   
+   *Mac*  
+   ```
+   brew install go
+   ```
+   
+   *Linux*  
+   ```
+   sudo apt update
+   sudo apt install golang
+   ```
+   
+   Verify the installation was a success using `go version`
+   
+   **Postgres**
+   
+   Install the database:
+   
+   *Mac*
+   ```
+   brew install postgresql@15
+   ```
+   
+   *Linux*
+   ```
+   sudo apt update
+   sudo apt install postgresql postgresql-contrib
+   ```
+   
+   After installing ensure you are on the right psql version (should be 15+):  
+   ```
+   psql --version
+   ```
+   
+   If you are installing on Linux ensure that you update the root password:
+   ```
+   sudo passwd postgres
+   ```
+   Enter a password, and be sure you won't forget it.
+   
+   We also need a [Postgres driver](https://github.com/lib/pq) to interact with the database.  
+   ```
+   go get github.com/lib/pq
+   ```
+   
+   **Goose**
+   
+   We're using [Goose](https://github.com/pressly/goose#install) to handle the database migrations in the Postgres database.
+   Install method:
+   ```
+   go install github.com/pressly/goose/v3/cmd/goose@latest
+   ```
+   
+   Verify the installation was a success using `goose -version`.
+   
+   **SQLC**  
+   
+   We're using [SQLC](https://sqlc.dev/) to handle converting our SQL commands to type safe Go code.  
+   Install method:  
+   ```
+   go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
+   ```
+   
+   Verify the installation was a success using `sqlc version`.
+  
+**4. Create the config file**
+    We're currently using a JSON file to handle the current user on the machine.  
+    This may be updated later to be handled differently.  
+      
+    Setup your file (named .gatorconfig.json) at your home directory.  
+    ```json
+    {
+      "db_url": "connection_string_goes_here",
+      "current_user_name": "username_goes_here"
+    }
+    ```
+    Replace the connection_string_goes_here with your connection string. See: (Goose migrations)[run-the-migrations].
+    The username replacement is handled by the application.
+    
+    Here's a bash script that creates and fills the file.
+    ```bash
+    cat > ~/gator_config.json << 'EOF'
+    {
+      "db_url": "connection_string_goes_here",
+      "current_user_name": "username_goes_here"
+    }
+    EOF
+    ```
 
-4. Create your database
-Start the database service:
-```
-Mac: brew services start postgresql@15
-Linux: sudo service postgresql start
-```
+**4. Create your database**
+    Start the database service:
+    ```
+    Mac: brew services start postgresql@15
+    Linux: sudo service postgresql start
+    ```
+      
+    Using either base psql or (PGAdmin)[https://www.pgadmin.org/] connect to the server.  
+    For psql:  
+    ```
+    Mac: psql postgres
+    Linux: sudo -u postgres psql
+    ```
+    Create the database  
+    ```
+    CREATE DATABASE gator;
+    ```
+    Set the user password (Linux only).
   
-Using either base psql or (PGAdmin)[https://www.pgadmin.org/] connect to the server.  
-For psql:  
-```
-Mac: psql postgres
-Linux: sudo -u postgres psql
-```
-Create the database  
-```
-CREATE DATABASE gator;
-```
-Set the user password (Linux only).
-
-5. Run the migrations
-We need to run the migrations like so:
-```
-goose `connection string` up
-```
-  
-Your connection string should be formatted like so:  
-macOS (no password, your username): postgres://{user}:@localhost:5432/gator?sslmode=disable
-Linux (password from (section 4)[#create-your-database], postgres user): postgres://{password}:postgres@localhost:5432/gator?sslmode=disable
-  
-Run all 5 migrations.  
-You should see a confirmation message be printed to your terminal for each migration.  
+**5. Run the migrations**  
+    We need to run the migrations like so:  
+    ```
+    goose `connection string` up
+    ```
+      
+    Your connection string should be formatted like so:  
+    macOS (no password, your username): postgres://{user}:@localhost:5432/gator?sslmode=disable
+    Linux (password from (section 4)[#create-your-database], postgres user): postgres://{password}:postgres@localhost:5432/gator?sslmode=disable
+      
+    Run all 5 migrations.  
+    You should see a confirmation message be printed to your terminal for each migration.  
   
 6. Install the application
-Go to your directory storing the go code and run:
-```
-go install .
-```
+    Go to your directory storing the go code and run:
+    ```
+    go install .
+    ```
   
 ## Usage
 After installing there are a number of commands that can be used to interact with the application.  
@@ -210,42 +220,44 @@ I would recommend firstly using the help command:
 For example I called mine gator so it would be `gator help`.  
   
 The commands you should see alongside a description are:  
-- help     
+- help
+   
 *Users*  
 - login  
 - register 
 - reset  
-- users 
+- users
+  
 *feeds/posts*    
 - addfeed  
 - browse   
 - feeds    
 - follow   
 - following
-- unfollow 
+- unfollow
+   
 *service*
 - agg       
   
 The following commands expect an argument to be passed as arguments:  
-`agg` requires a time string to be passed (1m, 1h, 1d, etc.), this is the interval which the aggregator will use to scrape the feeds (**do not DoS the feeds**).  
-`addfeed` requires the title of the feed and the url.  
-`browse` defaults to showing the 2 most recent rss feed items, but you can pass a integer value and it will return that many rss feed items.  
-`login` requires the name of the user logging in.
-`register` requires the name of the user to register in the postgres database.
-`follow` requires the title of the feed to follow.
-`following` by default returns what you are following, but you can pass another user name to see what they are following
-`unfollow` requires the title of the feed that you want to unfollow.
+**`agg`** requires a time string to be passed (1m, 1h, 1d, etc.), this is the interval which the aggregator will use to scrape the feeds (**do not DoS the feeds**).  
+**`addfeed`** requires the title of the feed and the url.  
+**`browse`** defaults to showing the 2 most recent rss feed items, but you can pass a integer value and it will return that many rss feed items.  
+**`login`** requires the name of the user logging in.  
+**`register`** requires the name of the user to register in the postgres database.  
+**`follow`** requires the title of the feed to follow.  
+**`following`** by default returns what you are following, but you can pass another user name to see what they are following.  
+**`unfollow`** requires the title of the feed that you want to unfollow.  
 
 ## Requirements
-The application has the following dependencies:
-- Go
-- Postgres database
-- Postgres driver
-- Goose
-- SQLC
-
+The application has the following dependencies:  
+- Go  
+- Postgres database  
+- Postgres driver  
+- Goose  
+- SQLC  
+  
 ## Contributing
-
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes
